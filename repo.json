@@ -1,0 +1,9 @@
+{
+  "index_v2": "https://raw.githubusercontent.com/wancloud/suwayomi-extension/repo/index.pb",
+  "meta": {
+    "name": "WanCloud Extensions",
+    "shortName": "WAN",
+    "website": "https://github.com/wancloud/suwayomi-extension",
+    "signingKeyFingerprint": "75b1617f04a4f2e794a3ede0aa7932eb25572a5b04df0699fc7f0e99a8f4c146"
+  }
+}

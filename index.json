@@ -1,0 +1,39 @@
+{
+  "name": "WanCloud Extensions",
+  "badgeLabel": "WAN",
+  "signingKey": "75b1617f04a4f2e794a3ede0aa7932eb25572a5b04df0699fc7f0e99a8f4c146",
+  "contact": {
+    "website": "https://github.com/wancloud/suwayomi-extension"
+  },
+  "extensionList": {
+    "extensions": [
+      {
+        "name": "ManHuaGui (WanCloud)",
+        "packageName": "eu.kanade.tachiyomi.extension.zh.manhuaguiwan",
+        "resources": {
+          "apkUrl": "https://raw.githubusercontent.com/wancloud/suwayomi-extension/repo/apk/tachiyomi-zh.manhuaguiwan-v1.4.28.apk",
+          "iconUrl": "https://raw.githubusercontent.com/wancloud/suwayomi-extension/repo/icon/eu.kanade.tachiyomi.extension.zh.manhuaguiwan.png",
+          "jarUrl": "https://raw.githubusercontent.com/wancloud/suwayomi-extension/repo/jar/tachiyomi-zh.manhuaguiwan-v1.4.28.jar"
+        },
+        "extensionLib": "1.4",
+        "versionCode": "28",
+        "versionName": "1.4.28",
+        "contentWarning": "CONTENT_WARNING_MIXED",
+        "sources": [
+          {
+            "id": "3118457253568602680",
+            "name": "\u6f2b\u753b\u67dc (WanCloud)",
+            "language": "zh",
+            "homeUrl": "https://www.manhuagui.com",
+            "mirrorUrls": [
+              "https://www.manhuagui.com",
+              "https://tw.manhuagui.com",
+              "https://www.mhgui.com",
+              "https://tw.mhgui.com"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
