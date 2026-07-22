@@ -35,12 +35,20 @@ The APK is written to `src/zh/manhuagui/build/outputs/apk/release/`.
 If no `signingkey.jks` keystore exists at the repository root, the release build is signed with
 the debug key, which Suwayomi-Server accepts.
 
-## Serving the repo to Suwayomi
+## Using this repo in Suwayomi
 
-Run `python scripts/create-repo.py` after building to produce a `repo/` directory containing
-`index.min.json` and the APKs. Serve it over HTTP (e.g. `python -m http.server -d repo`) and add
-the URL of `index.min.json` as an extension repo in Suwayomi's settings
-(Settings → Browse → Extension repos).
+Add this URL as an extension repo in Suwayomi (Settings → Browse → Extension repos):
+
+```
+https://raw.githubusercontent.com/wancloud/suwayomi-extension/repo/index.min.json
+```
+
+## Publishing updates
+
+Run `python scripts/create-repo.py` after building to regenerate the `repo/` directory
+(`index.min.json`, APKs, icons), then push its contents to the `repo` branch. For local testing,
+serve it directly with `python -m http.server -d repo` and use
+`http://localhost:8000/index.min.json` instead.
 
 ## Adding another extension
 
