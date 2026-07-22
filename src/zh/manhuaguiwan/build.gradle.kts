@@ -5,13 +5,13 @@ plugins {
 }
 
 keiyoushi {
-    name = "ManHuaGui"
+    name = "ManHuaGui (WanCloud)"
     versionCode = 28
     contentWarning = ContentWarning.MIXED
     libVersion = "1.4"
 
     source {
-        name = "漫画柜"
+        name = "漫画柜 (WanCloud)"
         lang = "zh"
         baseUrl {
             mirrors(

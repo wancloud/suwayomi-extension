@@ -8,7 +8,7 @@ A source-extension repository for [Suwayomi-Server](https://github.com/Suwayomi/
 
 | Extension | Language | Site |
 |---|---|---|
-| ManHuaGui (漫画柜) | zh | https://www.manhuagui.com |
+| ManHuaGui (WanCloud) (漫画柜) | zh | https://www.manhuagui.com |
 
 ## Repository layout
 
@@ -28,10 +28,10 @@ Requirements: JDK 17+ and the Android SDK (set `sdk.dir` in `local.properties`).
 Build a single extension:
 
 ```
-./gradlew :src:zh:manhuagui:assembleRelease
+./gradlew :src:zh:manhuaguiwan:assembleRelease
 ```
 
-The APK is written to `src/zh/manhuagui/build/outputs/apk/release/`.
+The APK is written to `src/zh/manhuaguiwan/build/outputs/apk/release/`.
 If no `signingkey.jks` keystore exists at the repository root, the release build is signed with
 the debug key, which Suwayomi-Server accepts.
 
@@ -52,7 +52,7 @@ serve it directly with `python -m http.server -d repo` and use
 
 ## Adding another extension
 
-Create `src/<lang>/<name>/` with a `build.gradle.kts` (see `src/zh/manhuagui/build.gradle.kts`
+Create `src/<lang>/<name>/` with a `build.gradle.kts` (see `src/zh/manhuaguiwan/build.gradle.kts`
 for the DSL), Kotlin sources under `src/`, and launcher icons under `res/`. Gradle discovers the
 module automatically — no settings changes needed.
 

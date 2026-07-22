@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.extension.zh.manhuagui
+package eu.kanade.tachiyomi.extension.zh.manhuaguiwan
 
 import eu.kanade.tachiyomi.source.model.Filter
 
