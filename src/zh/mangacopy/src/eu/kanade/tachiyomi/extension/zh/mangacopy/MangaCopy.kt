@@ -29,7 +29,21 @@ abstract class MangaCopy : HttpSource() {
 
     override val client: OkHttpClient = network.client.newBuilder()
         .rateLimit(2)
+        .addInterceptor { chain ->
+            val request = chain.request()
+            val response = try {
+                chain.proceed(request)
+            } catch (e: Exception) {
+                log("REQUEST FAILED ${request.method} ${request.url} -> ${e.javaClass.simpleName}: ${e.message}")
+                throw e
+            }
+            log("HTTP ${response.code} ${request.method} ${request.url}")
+            response
+        }
         .build()
+
+    /** Traced to stdout so the lines show up in the Suwayomi server log. */
+    private fun log(message: String) = println("[MangaCopy] $message")
 
     /**
      * Browsing and search go through the app API; it stays available when the
@@ -102,12 +116,18 @@ abstract class MangaCopy : HttpSource() {
                 author = comic.author.joinToString { it.name }
             }
         }
+        // Thumbnails are fetched by the app itself, so log them here to make a
+        // failing cover URL visible alongside the requests this client makes.
+        log("list: ${entries.size} entries, first url='${entries.firstOrNull()?.url}' cover='${entries.firstOrNull()?.thumbnail_url}'")
         return MangasPage(entries, results.offset + results.limit < results.total)
     }
 
     // ============================== Details ===============================
 
-    override fun mangaDetailsRequest(manga: SManga): Request = GET(baseUrl + manga.url, headers)
+    override fun mangaDetailsRequest(manga: SManga): Request {
+        log("mangaDetails: manga.url='${manga.url}' -> $baseUrl${manga.url}")
+        return GET(baseUrl + manga.url, headers)
+    }
 
     override fun mangaDetailsParse(response: Response): SManga {
         val document = response.asJsoup()
@@ -136,22 +156,28 @@ abstract class MangaCopy : HttpSource() {
 
     override fun chapterListRequest(manga: SManga): Request {
         val pathWord = manga.url.substringAfterLast('/')
+        val url = "$baseUrl/comicdetail/$pathWord/chapters"
+        log("chapterList: manga.url='${manga.url}' pathWord='$pathWord' -> $url")
+        require(pathWord.isNotBlank()) { "無法從漫畫網址取得 path word：'${manga.url}'" }
+
         val chapterHeaders = headersBuilder()
             .set("Referer", "$baseUrl${manga.url}")
             .set("X-Requested-With", "XMLHttpRequest")
             .build()
-        return GET("$baseUrl/comicdetail/$pathWord/chapters", chapterHeaders)
+        return GET(url, chapterHeaders)
     }
 
     override fun chapterListParse(response: Response): List<SChapter> {
         val pathWord = response.request.url.pathSegments.let { it[it.size - 2] }
         val payload = response.parseAs<ApiResponse<String>>().results
             ?: throw Exception(BLOCKED_MESSAGE)
+        log("chapterList: encrypted payload ${payload.length} chars for '$pathWord'")
 
         val chapters = decrypt(payload, pathWord)
             .parseAs<ChapterListDto>()
             .groups.values
             .flatMap(GroupDto::chapters)
+        log("chapterList: decrypted ${chapters.size} chapters")
 
         // A blocked or rate-limited request still decrypts cleanly, it just has
         // no chapters in it, so tell the user what actually happened.
@@ -168,20 +194,26 @@ abstract class MangaCopy : HttpSource() {
 
     // =============================== Pages ================================
 
-    override fun pageListRequest(chapter: SChapter): Request = GET(baseUrl + chapter.url, headers)
+    override fun pageListRequest(chapter: SChapter): Request {
+        log("pageList: chapter.url='${chapter.url}' -> $baseUrl${chapter.url}")
+        return GET(baseUrl + chapter.url, headers)
+    }
 
     override fun pageListParse(response: Response): List<Page> {
         val body = response.body.string()
 
         val payload = CONTENT_KEY_REGEX.find(body)?.groupValues?.get(1)
+        log("pageList: page ${body.length} chars, contentKey ${payload?.length ?: -1} chars")
         if (payload.isNullOrEmpty()) throw Exception(BLOCKED_MESSAGE)
 
         // The chapter page ships the key it was encrypted with.
         val key = PAGE_KEY_REGEX.find(body)?.groupValues?.get(1) ?: DEFAULT_KEY
 
-        return aesDecrypt(payload, key)
+        val pages = aesDecrypt(payload, key)
             .parseAs<List<PageDto>>()
             .mapIndexed { index, page -> Page(index, imageUrl = page.url) }
+        log("pageList: ${pages.size} pages, first=${pages.firstOrNull()?.imageUrl}")
+        return pages
     }
 
     override fun imageUrlParse(response: Response): String = throw UnsupportedOperationException()
