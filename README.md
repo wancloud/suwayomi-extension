@@ -9,6 +9,11 @@ A source-extension repository for [Suwayomi-Server](https://github.com/Suwayomi/
 | Extension | Language | Site |
 |---|---|---|
 | ManHuaGui (WanCloud) (漫画柜) | zh | https://www.manhuagui.com |
+| MangaCopy (WanCloud) (拷貝漫畫) | zh | https://www.mangacopy.com |
+
+Both sites restrict access by IP and return empty results to blocked addresses, so the
+Suwayomi server needs a route the site accepts. MangaCopy surfaces a clear message instead of
+silently showing no chapters when this happens.
 
 ## Repository layout
 
