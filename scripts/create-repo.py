@@ -92,12 +92,19 @@ def main() -> None:
         info = json.loads(info_file.read_text(encoding="utf-8"))
         package_name = info["packageName"]
 
-        apk = next((info_file.parent / "outputs/apk/release").glob("*.apk"), None)
+        # Old artifacts are left behind by previous builds, so select the ones
+        # matching this build's version instead of whatever the glob yields
+        # first — publishing a stale jar makes clients install the old code
+        # while the index advertises the new version.
+        version = info["versionName"]
+        apk = next((info_file.parent / "outputs/apk/release").glob(f"*-v{version}-release.apk"), None)
         if apk is None:
-            sys.exit(f"{package_name}: no release APK found — run assembleRelease first")
-        jar = next((info_file.parent / "outputs/jar/release").glob("*.jar"), None)
+            apk = next((info_file.parent / "outputs/apk/release").glob(f"*-v{version}.apk"), None)
+        if apk is None:
+            sys.exit(f"{package_name}: no release APK for v{version} — run assembleRelease first")
+        jar = next((info_file.parent / "outputs/jar/release").glob(f"*-v{version}.jar"), None)
         if jar is None:
-            sys.exit(f"{package_name}: no release JAR found — run assembleRelease first")
+            sys.exit(f"{package_name}: no release JAR for v{version} — run assembleRelease first")
 
         apk_name = apk.name.replace("-release.apk", ".apk")
         shutil.copyfile(apk, APK_DIR / apk_name)
@@ -207,9 +214,23 @@ def main() -> None:
         encoding="utf-8",
     )
 
+    # Guard against publishing an index that points at artifacts which are
+    # missing or belong to a different version.
+    for ext in extensions:
+        for kind, url in (("apk", ext.resources.apkUrl), ("jar", ext.resources.jarUrl)):
+            name = url.rsplit("/", 1)[-1]
+            if not (REPO_DIR / kind / name).exists():
+                sys.exit(f"{ext.packageName}: {kind} '{name}' missing from repo/{kind}")
+            if f"-v{ext.versionName}." not in name:
+                sys.exit(
+                    f"{ext.packageName}: {kind} '{name}' does not match version {ext.versionName}"
+                )
+
     print(f"Wrote {REPO_DIR} with {len(extensions)} extension(s):")
     for ext in extensions:
         print(f"  {ext.packageName} v{ext.versionName}")
+        print(f"    apk: {ext.resources.apkUrl.rsplit('/', 1)[-1]}")
+        print(f"    jar: {ext.resources.jarUrl.rsplit('/', 1)[-1]}")
 
 
 if __name__ == "__main__":
